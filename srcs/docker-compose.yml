@@ -1,0 +1,27 @@
+version: '3'
+
+volumes:
+    nginx:
+        driver: local
+        driver_opts:
+            type: 'none'
+            o: 'bind'
+            device: './volumes/nginx'
+
+services:
+    nginx:
+        build: requirements/nginx/
+        container_name: nginx
+        ports:
+            - "222:22"
+        volumes:
+            - "nginx:/var/www/html"
+        networks:
+            - frontend
+        restart: always
+
+
+
+networks:
+    frontend:
+    backend:
