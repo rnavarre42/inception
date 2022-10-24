@@ -1,30 +1,44 @@
-NAME	=	inception
+NAME		=	inception
+DCPATH		=	srcs/
+DCFILE		=	docker-compose.yml
+DCCONFIG	=	$(addprefix $(DCPATH), $(DCFILE))
+DCFLAGS		=	-f
+DC			=	docker compose $(DCFLAGS) $(DCCONFIG)
 
+CURDIR		=	$(abspath .)
 
-.PHONY: all
+WT_SP		=	$(WT) sp
+
 all:	prune reload
 
-.PHONY: linux
-.SILENT: linux
 linux:
 	echo "127.0.0.1 rnavarre.42.fr" >> /etc/hosts
 
-.PHONY: stop
-.SILENT: stop
 stop:
-	docker-compose -f srcs/docker-compose.yml down
+	$(DC) down
 
-.PHONY: clean
-.SILENT: clean
+start:
+	$(DC) up
+
 clean:	stop
 	echo stopping
 
-.PHONY: prune
-.SILENT: prune
 prune:	clean
 	docker system prune -f
 
-.PHONY: reload
-.SILENT: reload
 reload:
-	docker-compose -f srcs/docker-compose.yml up --build
+	$(DC) up -d --build
+
+mysql:
+	$(WT_SP) wsl --exec bash -c "/usr/bin/vim $(CURDIR)/srcs/requirements/mysql/Dockerfile"
+
+logs:
+	$(DC) logs --follow
+
+print:
+	echo $(DCPATH)
+	echo $(DCFILE)
+	echo $(DC)
+
+.PHONY: clean fclean all prune reload start stop linux logs
+.SILENT: clean fclean print

@@ -7,33 +7,17 @@ volumes:
             type: 'none'
             o: 'bind'
             device: '$HOME/42cursus/inception/volumes/nginx'
-    mysql:
-        driver: local
-        driver_opts:
-            type: 'none'
-            o: 'bind'
-            device: '$HOME/42cursus/inception/volumes/mysql'
 
 services:
     nginx:
         build: requirements/nginx/
         container_name: nginx
+        # tty: true
+        # stdin_open: true
         ports:
-            - "80:80"
-            - "443:443"
+            - "222:22"
         volumes:
             - "nginx:/var/www/html"
-        networks:
-            - frontend
-        restart: always
-
-    mysql:
-        build: requirements/mysql/
-        container_name: mysql
-        ports:
-            - "3306"
-        volumes:
-            - "mysql:/var/mysql"
         networks:
             - frontend
         restart: always
