@@ -1,43 +1,168 @@
 version: '3'
 
+name: "${PROJECT_NAME}"
+
 volumes:
-    nginx:
-        driver: local
-        driver_opts:
-            type: 'none'
-            o: 'bind'
-            device: '$HOME/42cursus/inception/volumes/nginx'
-    mysql:
-        driver: local
-        driver_opts:
-            type: 'none'
-            o: 'bind'
-            device: '$HOME/42cursus/inception/volumes/mysql'
+  wordpress:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '${WORDPRESS_VOLUME_LOCAL_PATH}'
+
+  mariadb:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '${MARIADB_VOLUME_LOCAL_PATH}'
 
 services:
-    nginx:
-        build: requirements/nginx/
-        container_name: nginx
-        ports:
-            - "80:80"
-            - "443:443"
-        volumes:
-            - "nginx:/var/www/html"
-        networks:
-            - frontend
-        restart: always
+  nginx:
+    hostname: "${NGINX_CONTAINER_NAME}"
+    build:
+      context: "${NGINX_DOCKERFILE_PATH}"
+      dockerfile: Dockerfile
+        #args:
+        #IMAGE: ${NGINX_IMAGE}
+        #TAG: ${NGINX_TAG}
+    container_name: "${NGINX_CONTAINER_NAME}"
+    environment:
+      - LISTEN_SSL_PORT=${NGINX_LISTEN_SSL_PORT}
+      - LISTEN_ADDRESS=${NGINX_LISTEN_ADDRESS}
+      - CERTS_PATH=${NGINX_CERTS_PATH}
+      - WORDPRESS_CERT_CRT=${WORDPRESS_CERTIFICATE_CRT}
+      - WORDPRESS_CERT_KEY=${WORDPRESS_CERTIFICATE_KEY}
+      - WORDPRESS_VIRTUAL_DOMAIN=${WORDPRESS_VIRTUAL_DOMAIN}
+      - WORDPRESS_PATH=${WORDPRESS_VOLUME_MOUNT_PATH}
+      - WORDPRESS_FPM_LISTEN_PORT=${WORDPRESS_FPM_LISTEN_PORT}
+      - WORDPRESS_HOST=${WORDPRESS_HOST}
 
-    mysql:
-        build: requirements/mysql/
-        container_name: mysql
-        ports:
-            - "3306"
-        volumes:
-            - "mysql:/var/mysql"
-        networks:
-            - frontend
-        restart: always
+    depends_on:
+      - "${WORDPRESS_CONTAINER_NAME}"
+
+    ports:
+      - target: "${NGINX_LISTEN_SSL_PORT}"
+        host_ip: "${NGINX_LISTEN_ADDRESS}"
+        published: "${NGINX_LISTEN_SSL_PORT}"
+        protocol: tcp
+        mode: host
+
+    volumes:
+      - "wordpress:${WORDPRESS_VOLUME_MOUNT_PATH}"
+
+    networks:
+      - "${NETNAME}"
+
+    restart: ${NGINX_RESTART}
+    stdin_open: "${NGINX_DEBUG}"
+    tty: "${NGINX_DEBUG}"
+
+  mariadb:
+    hostname: "${MARIADB_CONTAINER_NAME}"
+    build:
+      context: "${MARIADB_DOCKERFILE_PATH}"
+      dockerfile: Dockerfile
+      args:
+        RUN_USER: "${MARIADB_RUN_USER}"
+    container_name: "${MARIADB_CONTAINER_NAME}"
+    environment:
+      CONFIG_FILE: ${MARIADB_CONFIG_FILE}
+      RUN_USER: ${MARIADB_RUN_USER}
+      VOLUME_MOUNT_PATH: ${MARIADB_VOLUME_MOUNT_PATH}
+      LISTEN_PORT: ${MARIADB_LISTEN_PORT}
+      LISTEN_ADDRESS: ${MARIADB_LISTEN_ADDRESS}
+      WORDPRESS_USERHOST: ${MARIADB_WORDPRESS_HOSTNAME}
+      WORDPRESS_USERNAME: ${MARIADB_WORDPRESS_USER}
+      WORDPRESS_USERPASS: ${MARIADB_WORDPRESS_PASSWORD}
+      WORDPRESS_DATABASE: ${MARIADB_WORDPRESS_DATABASE}
+
+    expose:
+      - "${MARIADB_LISTEN_PORT}"
+
+    volumes:
+      - "mariadb:${MARIADB_VOLUME_MOUNT_PATH}"
+
+    networks:
+      - "${NETNAME}"
+
+    restart: "${MARIADB_RESTART}"
+    stdin_open: "${MARIADB_DEBUG}"
+    tty: "${MARIADB_DEBUG}"
+
+  wordpress:
+    hostname: "${WORDPRESS_CONTAINER_NAME}"
+    build: "${WORDPRESS_DOCKERFILE_PATH}"
+    container_name: "${WORDPRESS_CONTAINER_NAME}"
+    environment:
+      - WP_PATH=${WORDPRESS_PATH}
+      - WP_LOCALE=${WORDPRESS_LOCALE}
+      - WP_DATABASE=${WORDPRESS_MARIADB_DATABASE}
+      - WP_DBUSER=${WORDPRESS_MARIADB_USER}
+      - WP_DBPASS=${WORDPRESS_MARIADB_PASSWORD}
+      - WP_DBHOST=${WORDPRESS_MARIADB_HOSTNAME}
+      - WP_DBPORT=${WORDPRESS_MARIADB_PORT}
+      - WP_URL=${WORDPRESS_URL}
+      - WP_TITLE=${WORDPRESS_TITLE}
+      - WP_ADMIN_USER=${WORDPRESS_ADMIN_USER}
+      - WP_ADMIN_PASS=${WORDPRESS_ADMIN_PASSWORD}
+      - WP_ADMIN_EMAIL=${WORDPRESS_ADMIN_EMAIL}
+      - WP_NORMAL_USER=${WORDPRESS_NORMAL_USER}
+      - WP_NORMAL_EMAIL=${WORDPRESS_NORMAL_EMAIL}
+      - WP_NORMAL_PASS=${WORDPRESS_NORMAL_PASSWORD}
+      - WP_NORMAL_ROLE=${WORDPRESS_NORMAL_ROLE}
+      - FPM_PORT=${WORDPRESS_FPM_LISTEN_PORT}
+      - FPM_ADDRESS=${WORDPRESS_FPM_LISTEN_ADDRESS}
+
+    depends_on:
+      - "${MARIADB_CONTAINER_NAME}"
+
+    expose:
+      - "${WORDPRESS_FPM_LISTEN_PORT}"
+
+    volumes:
+      - "wordpress:${WORDPRESS_VOLUME_MOUNT_PATH}"
+
+    networks:
+      - "${NETNAME}"
+
+    restart: ${WORDPRESS_RESTART}
+    stdin_open: "${WORDPRESS_DEBUG}"
+    tty: "${WORDPRESS_DEBUG}"
+
+
+  ftp:
+    hostname: "${FTP_CONTAINER_NAME}"
+    build: "${FTP_DOCKERFILE_PATH}"
+    container_name: "${FTP_CONTAINER_NAME}"
+    environment:
+      - FTP_PORT=${FTP_LISTEN_PORT}
+      - FTP_ADDRESS=${FTP_LISTEN_ADDRESS}
+      - WORDPRESS_PATH=${WORDPRESS_VOLUME_MOUNT_PATH}"
+
+    ports:
+      - target: "${FTP_LISTEN_PORT}"
+        host_ip: "${FTP_LISTEN_ADDRESS}"
+        published: "${FTP_LISTEN_PORT}"
+        protocol: tcp
+        mode: host
+
+      - "10000-10010"
+
+    volumes:
+      - "wordpress:${WORDPRESS_VOLUME_MOUNT_PATH}"
+
+    networks:
+      - "${NETNAME}"
+
+    restart: ${FTP_RESTART}
+    stdin_open: "${FTP_DEBUG}"
+    tty: "${FTP_DEBUG}"
+
+  test:
+    build: requirements/test/
+    stdin_open: true
+    tty: true
 
 networks:
-    frontend:
-    backend:
+  net:

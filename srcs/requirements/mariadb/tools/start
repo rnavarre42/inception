@@ -1,0 +1,21 @@
+#!/bin/sh
+
+inception_log()
+{
+	local type="$1"; shift
+	printf '%s [%s] [Entrypoint]: %s\n' "$(date +%s)" "$type" "$*"
+}
+
+inception_note()
+{
+	inception_log Note "$@"
+}
+
+inception_note Creating config...
+configure
+inception_note Install databases...
+mariadb-install-db
+inception_note Hardering MariaDB...
+mariadb-hardering
+inception_note Run MariaDB daemon...
+exec mariadbd-safe

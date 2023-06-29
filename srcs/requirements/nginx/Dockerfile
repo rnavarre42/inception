@@ -1,14 +1,9 @@
-FROM alpine:3.14
+FROM alpine:3.15
 
-RUN apk update && apk upgrade && apk add --no-cache nginx openssl openssh openrc
-RUN rc-update add sshd
+RUN apk update && apk upgrade && apk add --no-cache vim nginx openssl
 
-WORKDIR /run/openrc
-RUN touch softlevel && \
-	openrc
+ADD tools/* /usr/bin/
+RUN configure
 
-RUN /etc/init.d/sshd start
-
-#ENTRYPOINT ["sh"]
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+CMD ["start"]
 

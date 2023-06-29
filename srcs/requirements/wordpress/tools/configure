@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+wp core download --path=${WP_PATH} --locale=${WP_LOCALE}
+wp config create --path=${WP_PATH} --dbhost=${WP_DBHOST}:${WP_DBPORT} --dbname=${WP_DATABASE} --dbuser=${WP_DBUSER} --dbpass=${WP_DBPASS}
+wp db create --path=${WP_PATH}
+wp core install --path=${WP_PATH} --url=${WP_URL} --title="${WP_TITLE}" --admin_user=${WP_ADMIN_USER} --admin_password=${WP_ADMIN_PASS} --admin_email=${WP_ADMIN_EMAIL}
+wp user create ${WP_NORMAL_USER} ${WP_NORMAL_EMAIL} --path=${WP_PATH} --user_pass=${WP_NORMAL_PASS} --role=${WP_NORMAL_ROLE}

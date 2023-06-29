@@ -1,36 +1,66 @@
-NAME		=	inception
-DCPATH		=	srcs/
-DCFILE		=	docker-compose.yml
-DCCONFIG	=	$(addprefix $(DCPATH), $(DCFILE))
-DCFLAGS		=	-f
-DC			=	docker compose $(DCFLAGS) $(DCCONFIG)
+NAME				=	inception
+DCPATH				=	srcs/
+DCFILE				=	docker-compose.yml
+DCCONFIG			=	$(addprefix $(DCPATH), $(DCFILE))
+DCFLAGS				=	-f
+DC					=	$(DOCKER) compose $(DCFLAGS) $(DCCONFIG)
+DOCKER				=	docker
+CURDIR				=	$(abspath .)
+VOLUME_PATH			=	$(USER)/data/
+WORDPRESS_NAME		=	wordpress
+MARIADB_NAME		=	mariadb
+NGINX_NAME			=	nginx
+FTP_NAME			=	ftp
+TEST_NAME			=	test
+WORDPRESS_VOLUME	=	$(addprefix $(VOLUME_PATH), $(WORDPRESS_NAME))
+MARIADB_VOLUME		=	$(addprefix $(VOLUME_PATH), $(MARIADB_NAME))
+VOLUMES				=	$(WORDPRESS_VOLUME) $(MARIADB_VOLUME)
+CONTAINERS			=	$(WORDPRESS_NAME) $(MARIADB_NAME) $(NGINX_NAME) $(FTP_NAME) $(TEST_NAME)
 
-CURDIR		=	$(abspath .)
+# WSL Windows Terminal manipulation
+WT_SP				=	$(WT) sp
 
-WT_SP		=	$(WT) sp
 
 all:	prune reload
 
 linux:
-	echo "127.0.0.1 rnavarre.42.fr" >> /etc/hosts
+	sudo echo "127.0.0.1 rnavarre.42.fr" >> /etc/hosts
 
-stop:
+down:
 	$(DC) down
 
-start:
-	$(DC) up
+up:
+	$(DC) up -d
 
-clean:	stop
+clean:	down
 	echo stopping
 
-prune:	clean
-	docker system prune -f
+fclean:	clean
+	$(DC) down -v --rmi "local"
+
+wordpress_clean:
+	$(DC) down wordpress -v --rmi "local"
+
+volumes:	$(VOLUMES)
+
+$(CONTAINERS):
+	$(DC) up -d $@ --build
+
+$(VOLUMES):
+	mkdir -p $@
+
+#prune:	clean
+#	$(DOCKER) system prune -f
 
 reload:
 	$(DC) up -d --build
 
-mysql:
-	$(WT_SP) wsl --exec bash -c "/usr/bin/vim $(CURDIR)/srcs/requirements/mysql/Dockerfile"
+edit:
+	$(WT_SP) -H wsl --exec bash -c "/usr/bin/vim $(CURDIR)/srcs/requirements/mariadb/Dockerfile;"	\
+	mf --direction up \; \
+	sp -V wsl --exec bash -c "/usr/bin/vim $(CURDIR)/srcs/requirements/nginx/Dockerfile;"		\
+	mf --direction down \; \
+	sp -V wsl --exec bash -c "/usr/bin/vim $(CURDIR)/srcs/requirements/wordpress/Dockerfile"
 
 logs:
 	$(DC) logs --follow

@@ -1,0 +1,77 @@
+#!/usr/bin/env sh
+
+MYSQL="/usr/bin/env mysqld --bootstrap"
+
+mysql()
+{
+	if [ $1 == 'sendall' ]
+	then
+		echo "${MYSQL_MESSAGE}" | ${MYSQL}
+		MYSQL_MESSAGE=
+	else
+		MYSQL_MESSAGE=${MYSQL_MESSAGE}$(mysql_"$@")
+	fi
+}
+
+mysql_createdb()
+{
+echo "
+CREATE DATABASE IF NOT EXISTS $1;
+"
+}
+
+mysql_dropdb()
+{
+echo "
+DROP DATABASE IF EXISTS $1;
+"
+}
+
+mysql_adduser()
+{
+echo "
+FLUSH PRIVILEGES;
+CREATE USER IF NOT EXISTS '$1'@'$2' IDENTIFIED BY '$3';
+"
+}
+
+mysql_moduser_pass()
+{
+echo "
+FLUSH PRIVILEGES;
+ALTER USER IF EXISTS '$1'@'$2' IDENTIFIED BY '$3';
+"
+}
+
+mysql_deluser()
+{
+echo "
+FLUSH PRIVILEGES;
+DROP USER IF EXISTS '$1'@'$2';
+"
+}
+
+mysql_grant()
+{
+echo "
+FLUSH PRIVILEGES;
+GRANT ALL PRIVILEGES ON $1.* TO '$2'@'$3';
+"
+}
+
+generate_root_pass()
+{
+	< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-16}
+}
+
+MYSQL_ROOT_PASS=$(generate_root_pass)
+echo "MYSQL root random key generated (you should save it): ${MYSQL_ROOT_PASS}"
+#mysql createdb ${WORDPRESS_DATABASE}
+mysql moduser_pass root localhost ${MYSQL_ROOT_PASS}
+mysql adduser ${WORDPRESS_USERNAME} ${WORDPRESS_USERHOST} ${WORDPRESS_USERPASS}
+mysql grant ${WORDPRESS_DATABASE} ${WORDPRESS_USERNAME} ${WORDPRESS_USERHOST}
+mysql deluser mysql localhost
+mysql deluser '' localhost
+mysql deluser '' mariadb
+mysql sendall
+

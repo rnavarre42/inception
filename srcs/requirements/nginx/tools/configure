@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+mkdir -p /etc/nginx/certs
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ${WORDPRESS_CERT_KEY} -out ${WORDPRESS_CERT_CRT} -subj "/C=ES/ST=Madrid/L=Madrid/O=Global Security/OU=IT Department/CN=${WORDPRESS_DOMAIN}"
