@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+download-wp
+configure
+template
+exec php-fpm81 -F -e

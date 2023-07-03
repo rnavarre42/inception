@@ -1,9 +1,15 @@
-FROM alpine:3.15
+FROM alpine
 
-RUN apk update && apk upgrade && apk add --no-cache vim nginx openssl
+ARG WORDPRESS_CERT_CRT
+ARG WORDPRESS_CERT_KEY
+ARG WORDPRESS_VIRTUAL_DOMAIN
+ARG CERTS_PATH
 
+RUN apk update && apk upgrade && apk add --no-cache nginx openssl vim
+
+ADD conf/default.conf.template /etc/nginx/http.d/
 ADD tools/* /usr/bin/
 RUN configure
 
-CMD ["start"]
+CMD ["entrypoint"]
 

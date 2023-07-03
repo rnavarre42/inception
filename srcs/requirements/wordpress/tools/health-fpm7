@@ -1,0 +1,15 @@
+#!/usr/bin/env sh 
+
+set -e
+export SCRIPT_NAME=/croak
+export SCRIPT_FILENAME=/croak
+export REQUEST_METHOD=GET
+
+RESPONSE=`cgi-fcgi -bind -connect localhost:${FPM_LISTEN_PORT} | tail -1`
+
+if [ "${RESPONSE}" = "piumm" ]; then
+    exit 0
+fi
+
+exit 1
+

@@ -1,0 +1,47 @@
+# This is a default site configuration which will simply return 404, preventing
+# chance access to any other virtualhost.
+
+server {
+	listen ${LISTEN_PORT} default_server;
+	listen [::]:${LISTEN_PORT} default_server;
+
+	server_name ${WORDPRESS_VIRTUAL_DOMAIN} www.${WORDPRESS_VIRTUAL_DOMAIN};
+
+	return 301 https://\$host\$request_uri;
+}
+
+server {
+	listen ${LISTEN_SSL_PORT} ssl;
+	listen [::]:${LISTEN_SSL_PORT} ssl;
+	
+	server_name ${WORDPRESS_VIRTUAL_DOMAIN} www.${WORDPRESS_VIRTUAL_DOMAIN};
+
+	ssl_certificate ${WORDPRESS_CERT_CRT};
+	ssl_certificate_key ${WORDPRESS_CERT_KEY};
+	ssl_protocols TLSv1.2 TLSv1.3;
+
+	root ${WORDPRESS_PATH};
+
+	index index.php index.html index.htm;
+
+	location / {
+		autoindex on;
+		try_files \$uri \$uri/ /index.php?\$args;
+	}
+
+	location ~ \.php\$ {
+		try_files \$uri =404;
+
+		fastcgi_split_path_info ^(.+\.php)(/.*)\$;
+
+		fastcgi_pass ${WORDPRESS_HOST}:${WORDPRESS_FPM_LISTEN_PORT};
+		fastcgi_index index.php;
+
+		include fastcgi_params;
+		fastcgi_intercept_errors on;
+		fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+		fastcgi_param QUERY_STRING \$query_string;
+		fastcgi_param PATH_INFO \$fastcgi_path_info;
+
+	}
+}

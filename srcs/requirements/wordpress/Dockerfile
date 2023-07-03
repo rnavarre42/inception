@@ -1,11 +1,14 @@
-FROM alpine:3.15
+FROM alpine
 
 RUN apk update && apk upgrade && apk add --no-cache \
+		fcgi \
 		mysql-client \
-		php7 php7-mysqli php7-iconv php7-phar php7-curl php7-json php7-fpm
+		php php-mysqli php-iconv php-phar php-curl php-json php-fpm
 
 ADD tools/* /usr/bin/
-RUN download-wp
+ADD conf/www.conf.template /
 
-CMD ["start"]
+WORKDIR /root
+
+CMD ["entrypoint"]
 

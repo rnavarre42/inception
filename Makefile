@@ -6,7 +6,7 @@ DCFLAGS				=	-f
 DC					=	$(DOCKER) compose $(DCFLAGS) $(DCCONFIG)
 DOCKER				=	docker
 CURDIR				=	$(abspath .)
-VOLUME_PATH			=	$(USER)/data/
+VOLUME_PATH			=	~$(USER)/data/
 WORDPRESS_NAME		=	wordpress
 MARIADB_NAME		=	mariadb
 NGINX_NAME			=	nginx
@@ -37,6 +37,8 @@ clean:	down
 
 fclean:	clean
 	$(DC) down -v --rmi "local"
+	sudo rm -Rf $(WORDPRESS_VOLUME)
+	sudo rm -Rf $(MARIADB_VOLUME)
 
 wordpress_clean:
 	$(DC) down wordpress -v --rmi "local"

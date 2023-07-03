@@ -1,16 +1,13 @@
-#!/bin/sh
-cat << eof > $CONFIG_FILE
-#
-# These groups are read by MariaDB server.
-# Use it for options that only the server (but not clients) should see
+#!/usr/bin/env sh
+install -d -o mysql /run/mysqld
 
-# this is read by the standalone daemon and embedded servers
+cat << EOF > ${CONFIG_FILE}
 [server]
 
 # this is only for the mysqld standalone daemon
 [mysqld]
-datadir=$VOLUME_MOUNT_PATH
-user=$RUN_USER
+datadir=${VOLUME_MOUNT_PATH}
+user=${RUN_USER}
 #skip-networking
 
 # Galera-related settings
@@ -25,8 +22,8 @@ user=$RUN_USER
 #
 # Allow server to accept connections on all interfaces.
 #
-bind-address=$LISTEN_ADDRESS
-port=$LISTEN_PORT
+bind-address=${LISTEN_ADDRESS}
+port=${LISTEN_PORT}
 #
 # Optional setting
 #wsrep_slave_threads=1
@@ -44,4 +41,5 @@ port=$LISTEN_PORT
 # If you use the same .cnf file for MariaDB of different versions,
 # use this group for options that older servers don't understand
 [mariadb-10.5]
-eof
+
+EOF

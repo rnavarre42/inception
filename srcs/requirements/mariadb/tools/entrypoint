@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+configure
+mariadb-hardering
+exec mysqld --defaults-file=${CONFIG_FILE}

@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+content=$(cat "/www.conf.template")
+updated_content=$(eval "echo \"$content\"")
+echo "$updated_content" > "/etc/php81/php-fpm.d/www.conf"
+rm /www.conf.template

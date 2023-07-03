@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+content=$(cat "${CONFIG_FILE}.template")
+updated_content=$(eval "echo \"$content\"")
+echo "$updated_content" > ${CONFIG_FILE}
+rm ${CONFIG_FILE}.template

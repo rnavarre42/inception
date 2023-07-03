@@ -1,9 +1,18 @@
-FROM alpine:3.15
+FROM alpine
 
-RUN apk update && apk upgrade && apk add --no-cache mariadb
+ARG RUN_USER
+ARG CONFIG_FILE
+ARG VOLUME_MOUNT_PATH
+ARG LISTEN_PORT
+ARG LISTEN_ADDRESS
+ARG WORDPRESS_USERNAME
+ARG WORDPRESS_USERHOST
+ARG WORDPRESS_USERPASS
+ARG WORDPRESS_DATABASE
+
+RUN apk update && apk upgrade && apk add --no-cache mariadb mysql-client
 
 ADD tools/* /usr/bin
-#RUN configure
 
-CMD ["start"]
+CMD ["entrypoint"]
 
