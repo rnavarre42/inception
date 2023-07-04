@@ -44,6 +44,13 @@ services:
       - WORDPRESS_FPM_LISTEN_PORT=${WORDPRESS_FPM_LISTEN_PORT}
       - WORDPRESS_HOST=${WORDPRESS_HOST}
 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
     depends_on:
       - wordpress
 
@@ -51,12 +58,6 @@ services:
       - target: "${NGINX_LISTEN_SSL_PORT}"
         host_ip: "${NGINX_LISTEN_ADDRESS}"
         published: "${NGINX_LISTEN_SSL_PORT}"
-        protocol: tcp
-        mode: host
-
-      - target: "${NGINX_LISTEN_PORT}"
-        host_ip: "${NGINX_LISTEN_ADDRESS}"
-        published: "${NGINX_LISTEN_PORT}"
         protocol: tcp
         mode: host
 
@@ -92,7 +93,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
-      start_period: 10s
+      start_period: 15s
 
     #container_name: "${MARIADB_CONTAINER_NAME}"
     #environment:
@@ -139,11 +140,11 @@ services:
       - mariadb
 
     healthcheck:
-      test: ["CMD", "health-fpm7"]
+      test: ["CMD", "health-fpm81"]
       interval: 5s
       timeout: 3s
       retries: 3
-      start_period: 1s
+      start_period: 15s
 
         #expose:
         #- "${WORDPRESS_FPM_LISTEN_PORT}"
