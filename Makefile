@@ -21,10 +21,12 @@ CONTAINERS			=	$(WORDPRESS_NAME) $(MARIADB_NAME) $(NGINX_NAME) $(FTP_NAME) $(TES
 WT_SP				=	$(WT) sp
 
 
-all:	reload
+all:	linux-hosts reload
 
-linux:
-	sudo bash -c "echo 127.0.0.1 rnavarre.42.fr >> /etc/hosts"
+linux-hosts:
+	if ! grep -q "127.0.0.1 rnavarre.42.fr" /etc/hosts; then \
+		sudo bash -c "echo 127.0.0.1 rnavarre.42.fr >> /etc/hosts"; \
+	fi
 
 down:
 	$(DC) down
@@ -70,4 +72,4 @@ print:
 	echo $(DC)
 
 .PHONY: clean fclean all reload start stop linux logs
-.SILENT: clean fclean print
+.SILENT: clean fclean print linux-hosts
