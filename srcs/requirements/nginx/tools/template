@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
-content=$(cat "${CONFIG_FILE}.template")
-updated_content=$(eval "echo \"$content\"")
-echo "$updated_content" > ${CONFIG_FILE}
-rm ${CONFIG_FILE}.template
+if [ -e "${CONFIG_FILE}.template" ]; then
+	content=$(cat "${CONFIG_FILE}.template")
+	updated_content=$(eval "echo \"$content\"")
+	echo "$updated_content" > ${CONFIG_FILE}
+	rm ${CONFIG_FILE}.template
+fi

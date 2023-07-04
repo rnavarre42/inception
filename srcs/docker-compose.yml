@@ -159,39 +159,5 @@ services:
     stdin_open: "${WORDPRESS_DEBUG}"
     tty: "${WORDPRESS_DEBUG}"
 
-
-  # ftp:
-  #   hostname: "${FTP_CONTAINER_NAME}"
-  #   build: "${FTP_DOCKERFILE_PATH}"
-  #   container_name: "${FTP_CONTAINER_NAME}"
-  #   environment:
-  #     - FTP_PORT=${FTP_LISTEN_PORT}
-  #     - FTP_ADDRESS=${FTP_LISTEN_ADDRESS}
-  #     - WORDPRESS_PATH=${WORDPRESS_VOLUME_MOUNT_PATH}"
-  #
-  #   ports:
-  #     - target: "${FTP_LISTEN_PORT}"
-  #       host_ip: "${FTP_LISTEN_ADDRESS}"
-  #       published: "${FTP_LISTEN_PORT}"
-  #       protocol: tcp
-  #       mode: host
-  #
-  #     - "10000-10010"
-  #
-  #   volumes:
-  #     - "wordpress:${WORDPRESS_VOLUME_MOUNT_PATH}"
-  #
-  #   networks:
-  #     - "${NETNAME}"
-  #
-  #   restart: ${FTP_RESTART}
-  #   stdin_open: "${FTP_DEBUG}"
-  #   tty: "${FTP_DEBUG}"
-  #
-  # test:
-  #   build: requirements/test/
-  #   stdin_open: true
-  #   tty: true
-  #
 networks:
   net:

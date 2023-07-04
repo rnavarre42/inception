@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
-wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-chmod +x wp-cli.phar
-mv wp-cli.phar /usr/bin/wp
+if [ ! -e "/usr/bin/wp" ]; then
+	wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+	chmod +x wp-cli.phar
+	mv wp-cli.phar /usr/bin/wp
+fi
 

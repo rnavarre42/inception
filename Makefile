@@ -21,10 +21,10 @@ CONTAINERS			=	$(WORDPRESS_NAME) $(MARIADB_NAME) $(NGINX_NAME) $(FTP_NAME) $(TES
 WT_SP				=	$(WT) sp
 
 
-all:	prune reload
+all:	reload
 
 linux:
-	sudo echo "127.0.0.1 rnavarre.42.fr" >> /etc/hosts
+	sudo bash -c "echo 127.0.0.1 rnavarre.42.fr >> /etc/hosts"
 
 down:
 	$(DC) down
@@ -51,10 +51,7 @@ $(CONTAINERS):
 $(VOLUMES):
 	mkdir -p $@
 
-#prune:	clean
-#	$(DOCKER) system prune -f
-
-reload:
+reload:		$(VOLUMES)
 	$(DC) up -d --build
 
 edit:
@@ -72,5 +69,5 @@ print:
 	echo $(DCFILE)
 	echo $(DC)
 
-.PHONY: clean fclean all prune reload start stop linux logs
+.PHONY: clean fclean all reload start stop linux logs
 .SILENT: clean fclean print
